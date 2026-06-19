@@ -1,1 +1,281 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QualiUBS</title>
+
+<style>
+body{
+font-family:Arial;
+padding:20px;
+background:#f2f2f2;
+}
+.botao{
+padding:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+margin:4px;
+opacity:.55;
+}
+.botao.selecionado{
+opacity:1;
+box-shadow:0 0 0 3px rgba(0,0,0,.35) inset;
+}
+.verde{background:green;color:white}
+.amarelo{background:gold}
+.vermelho{background:red;color:white}
+.aba{
+padding:8px 14px;
+margin:4px;
+cursor:pointer;
+border:none;
+border-radius:8px;
+background:#ddd;
+}
+.aba.ativa{
+background:#333;
+color:white;
+}
+.obs{
+font-style:italic;
+color:#555;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>QualiUBS</h1>
+
+<div id="abas"></div>
+
+<p>
+Score do eixo:
+<span id="score">0%</span>
+</p>
+
+<div id="conteudo"></div>
+
+<script>
+
+const eixos=["CCIB","NSP","Farmácia"]
+
+let aba="CCIB"
+
+let checklist=[
+
+// CCIB - Comissão de Controle de Infecção e Biossegurança
+{id:1,eixo:"CCIB",requisito:"Possui POP atualizado de higienização das mãos?",observacao:"",tipo:null,pontuacao:0},
+{id:2,eixo:"CCIB",requisito:"Disponibiliza álcool gel em todos os pontos de assistência?",observacao:"",tipo:null,pontuacao:0},
+{id:3,eixo:"CCIB",requisito:"Descarte de perfurocortantes em caixa coletora dentro da validade e abaixo do limite de preenchimento?",observacao:"",tipo:null,pontuacao:0},
+{id:4,eixo:"CCIB",requisito:"Sala de utilidades possui fluxo separado de material limpo e sujo?",observacao:"",tipo:null,pontuacao:0},
+{id:5,eixo:"CCIB",requisito:"Limpeza concorrente e terminal realizada conforme cronograma?",observacao:"",tipo:null,pontuacao:0},
+{id:6,eixo:"CCIB",requisito:"EPIs disponíveis e em quantidade adequada para toda a equipe?",observacao:"",tipo:null,pontuacao:0},
+{id:7,eixo:"CCIB",requisito:"Possui POP de gerenciamento de resíduos de serviços de saúde (RDC 222/2018)?",observacao:"",tipo:null,pontuacao:0},
+{id:8,eixo:"CCIB",requisito:"Realiza monitoramento e registro de temperatura das geladeiras de imunobiológicos?",observacao:"",tipo:null,pontuacao:0},
+{id:9,eixo:"CCIB",requisito:"Equipe capacitada em precauções padrão e precauções de isolamento?",observacao:"",tipo:null,pontuacao:0},
+{id:10,eixo:"CCIB",requisito:"Possui registro de notificação de eventos adversos relacionados à infecção?",observacao:"",tipo:null,pontuacao:0},
+
+// NSP - Núcleo de Segurança do Paciente
+{id:11,eixo:"NSP",requisito:"Possui Plano de Segurança do Paciente atualizado (PNSP)?",observacao:"",tipo:null,pontuacao:0},
+{id:12,eixo:"NSP",requisito:"Realiza identificação correta do paciente com no mínimo dois identificadores?",observacao:"",tipo:null,pontuacao:0},
+{id:13,eixo:"NSP",requisito:"Possui protocolo de prevenção de quedas implantado e divulgado à equipe?",observacao:"",tipo:null,pontuacao:0},
+{id:14,eixo:"NSP",requisito:"Realiza notificação de eventos adversos e near miss?",observacao:"",tipo:null,pontuacao:0},
+{id:15,eixo:"NSP",requisito:"Monitora a adesão aos 5 momentos de higiene das mãos (OMS)?",observacao:"",tipo:null,pontuacao:0},
+{id:16,eixo:"NSP",requisito:"Realiza dupla checagem na administração de medicamentos de alta vigilância?",observacao:"",tipo:null,pontuacao:0},
+{id:17,eixo:"NSP",requisito:"Possui fluxo definido de comunicação efetiva entre equipes (ex.: SBAR)?",observacao:"",tipo:null,pontuacao:0},
+{id:18,eixo:"NSP",requisito:"Realiza reuniões periódicas do NSP com atas registradas?",observacao:"",tipo:null,pontuacao:0},
+{id:19,eixo:"NSP",requisito:"Indicadores de segurança do paciente são monitorados mensalmente?",observacao:"",tipo:null,pontuacao:0},
+{id:20,eixo:"NSP",requisito:"Equipe recebe capacitação anual em segurança do paciente?",observacao:"",tipo:null,pontuacao:0},
+
+// Farmácia
+{id:21,eixo:"Farmácia",requisito:"Armazenamento de medicamentos respeita temperatura e umidade recomendadas?",observacao:"",tipo:null,pontuacao:0},
+{id:22,eixo:"Farmácia",requisito:"Controle de validade com sistema de inventário PEPS/FEFO implantado?",observacao:"",tipo:null,pontuacao:0},
+{id:23,eixo:"Farmácia",requisito:"Medicamentos sujeitos a controle especial armazenados em local seguro (Portaria 344/98)?",observacao:"",tipo:null,pontuacao:0},
+{id:24,eixo:"Farmácia",requisito:"Temperatura da geladeira de termolábeis é registrada ao menos 2x ao dia?",observacao:"",tipo:null,pontuacao:0},
+{id:25,eixo:"Farmácia",requisito:"Dispensação realizada somente mediante prescrição válida e legível?",observacao:"",tipo:null,pontuacao:0},
+{id:26,eixo:"Farmácia",requisito:"Possui POP de dispensação e orientação farmacêutica ao paciente?",observacao:"",tipo:null,pontuacao:0},
+{id:27,eixo:"Farmácia",requisito:"Área de armazenamento limpa, organizada e livre de infiltrações?",observacao:"",tipo:null,pontuacao:0},
+{id:28,eixo:"Farmácia",requisito:"Controle de estoque mínimo/máximo evita desabastecimento?",observacao:"",tipo:null,pontuacao:0},
+{id:29,eixo:"Farmácia",requisito:"Medicamentos vencidos são segregados e descartados conforme protocolo?",observacao:"",tipo:null,pontuacao:0},
+{id:30,eixo:"Farmácia",requisito:"Farmacêutico responsável técnico presente ou disponível conforme legislação?",observacao:"",tipo:null,pontuacao:0}
+
+]
+
+function desenharAbas(){
+
+let html=""
+
+eixos.forEach(e=>{
+
+html+=`
+<button
+class="aba ${e===aba?'ativa':''}"
+onclick="trocar('${e}')"
+>
+${e}
+</button>
+`
+
+})
+
+document
+.getElementById("abas")
+.innerHTML=html
+
+}
+
+function trocar(nome){
+
+aba=nome
+
+render()
+
+}
+
+function selecionar(id,tipo){
+
+let item=
+checklist.find(
+x=>x.id===id
+)
+
+if(
+tipo==="PC" ||
+tipo==="NC"
+){
+
+let obs=
+prompt(
+"Digite observação",
+item.observacao
+)
+
+if(!obs){
+
+alert(
+"Obrigatório"
+)
+
+return
+
+}
+
+item.observacao=obs
+
+}else{
+
+item.observacao=""
+
+}
+
+item.tipo=tipo
+
+if(tipo==="C")
+item.pontuacao=1
+
+if(tipo==="PC")
+item.pontuacao=.5
+
+if(tipo==="NC")
+item.pontuacao=0
+
+render()
+
+}
+
+function render(){
+
+desenharAbas()
+
+let html=""
+
+let itensDaAba=
+checklist.filter(
+x=>x.eixo===aba
+)
+
+itensDaAba.forEach(item=>{
+
+html+=`
+
+<div style="
+background:white;
+padding:15px;
+margin-top:10px;
+border-radius:10px">
+
+<h3>
+${item.requisito}
+</h3>
+
+<button
+class="
+botao verde ${item.tipo==='C'?'selecionado':''}"
+onclick="
+selecionar(${item.id},'C')
+">
+✔ Conforme
+</button>
+
+<button
+class="
+botao amarelo ${item.tipo==='PC'?'selecionado':''}"
+onclick="
+selecionar(${item.id},'PC')
+">
+⚠ Parcial
+</button>
+
+<button
+class="
+botao vermelho ${item.tipo==='NC'?'selecionado':''}"
+onclick="
+selecionar(${item.id},'NC')
+">
+✖ Não Conforme
+</button>
+
+${item.observacao?`<p class="obs">${item.observacao}</p>`:""}
+
+</div>
+`
+})
+
+document
+.getElementById(
+"conteudo"
+)
+.innerHTML=html
+
+let respondidos=
+itensDaAba.filter(
+x=>x.tipo!==null
+)
+
+let score=
+respondidos.length===0
+?0
+:(respondidos.reduce(
+(a,b)=>a+b.pontuacao,
+0
+)/respondidos.length)*100
+
+document
+.getElementById(
+"score"
+)
+.innerText=
+score.toFixed(0)+"%"
+
+}
+
+render()
+
+</script>
+
+</body>
+</html>
