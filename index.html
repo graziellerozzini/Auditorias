@@ -133,9 +133,23 @@ tr:hover td{background:var(--bg)}
 .answer-btn-pc:hover,.answer-btn-pc.sel{background:var(--yellow);color:#fff;border-color:var(--yellow)}
 .answer-btn-nc{background:var(--red-soft);color:var(--red);border-color:#fca5a5}
 .answer-btn-nc:hover,.answer-btn-nc.sel{background:var(--red);color:#fff;border-color:var(--red)}
-.obs-field{margin-top:8px;display:none}
+.answer-btn-na{background:var(--bg2);color:var(--text3);border-color:#cbd5e1}
+.answer-btn-na:hover,.answer-btn-na.sel{background:#94a3b8;color:#fff;border-color:#94a3b8}
+.obs-field{margin-top:12px;display:block;padding:10px;background:var(--bg);border-radius:6px}
 .obs-field.vis{display:block}
 .obs-req::placeholder{color:#f87171}
+.obs-input-wrapper{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+.obs-input-wrapper .form-input{flex:1}
+.obs-photo-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border-radius:6px;background:var(--accent-soft);border:1.5px solid var(--border);cursor:pointer;transition:all .15s;font-size:1.2rem;flex-shrink:0}
+.obs-photo-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+#obs-file-input{display:none}
+.obs-photo-container{margin-top:8px;padding:10px;background:var(--surface);border:1.5px solid var(--border);border-radius:6px;display:none}
+.obs-photo-container.has-photo{display:block}
+.obs-photo-preview{position:relative;display:inline-block;max-width:100%;max-height:200px}
+.obs-photo-preview img{max-width:100%;max-height:200px;border-radius:4px;display:block}
+.obs-photo-remove{position:absolute;top:4px;right:4px;background:#dc2626;color:#fff;border:none;border-radius:50%;width:24px;height:24px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .15s}
+.obs-photo-remove:hover{background:#991b1b}
+.obs-photo-label{font-size:.75rem;color:var(--text3);margin-top:6px;display:block}
 
 /* SCORE METER */
 .score-meter{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg);border-radius:10px;margin-bottom:18px;flex-wrap:wrap;gap:14px}
@@ -216,7 +230,7 @@ tr:hover td{background:var(--bg)}
 .empty{text-align:center;padding:55px 20px;color:var(--text3)}
 .empty-icon{font-size:2.8rem;margin-bottom:10px}
 .empty-text{font-size:.9rem;margin-bottom:14px}
-.chart-container{position:relative;height:200px}
+.chart-container{position:relative;height:300px;margin-bottom:20px}
 .alert{padding:10px 14px;border-radius:8px;font-size:.82rem;font-weight:500;display:flex;align-items:center;gap:7px;margin-bottom:14px}
 .alert-info{background:var(--blue-soft);color:var(--blue);border:1px solid #93c5fd}
 .alert-warn{background:var(--yellow-soft);color:var(--yellow);border:1px solid #fde047}
@@ -392,6 +406,9 @@ tr:hover td{background:var(--bg)}
 </head>
 <body>
 
+<!-- CONTAINER PRINCIPAL DA APLICAÇÃO -->
+<div id="app-container" style="display:flex;flex-direction:column;min-height:100vh">
+
 <!-- HEADER -->
 <header class="header">
   <a href="#" class="logo" onclick="return false">
@@ -399,19 +416,25 @@ tr:hover td{background:var(--bg)}
     <span class="logo-text">Audita<span>APS</span></span>
   </a>
   <nav class="header-nav">
-    <button onclick="showView('dashboard')" class="active" id="nav-dashboard">Dashboard</button>
-    <button onclick="showView('auditorias')" id="nav-auditorias">Auditorias</button>
+    <button onclick="showView('indicadores')" id="nav-indicadores">Indicadores Avançados</button>
     <button onclick="showView('plano')" id="nav-plano">Plano de Ação</button>
     <button onclick="showView('relatorio')" id="nav-relatorio">Relatório</button>
-    <button onclick="showView('inteligencia')" id="nav-inteligencia">🧠 Central de Inteligência</button>
-    <button onclick="showView('galeria')" id="nav-galeria">🖼️ Galeria de Evidências</button>
-    <button onclick="showView('comparacoes')" id="nav-comparacoes">⚖️ Comparações</button>
+    <button onclick="showView('inteligencia')" id="nav-inteligencia">Central de Inteligência</button>
+    <button onclick="showView('galeria')" id="nav-galeria">Galeria de Evidências</button>
+    <button onclick="showView('comparacoes')" id="nav-comparacoes">Comparações</button>
   </nav>
   <div class="global-search" id="global-search-wrap">
     <input type="text" id="global-search-input" placeholder="🔎 Buscar unidade, requisito, eixo, auditor…" oninput="onGlobalSearch(this.value)" onfocus="onGlobalSearch(this.value)">
     <div class="gs-results" id="gs-results"></div>
   </div>
   <div class="header-right" style="gap:10px">
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg);border-radius:7px;font-size:.8rem">
+      <span style="color:var(--text3)">👤</span>
+      <select id="select-auditor" onchange="definirAuditorAtual(this.value)" style="background:none;border:none;color:var(--text2);font-weight:500;font-family:var(--font);cursor:pointer">
+        <option value="Grazielle Rozzini">Grazielle Rozzini</option>
+        <option value="Leticia Lopes">Leticia Lopes</option>
+      </select>
+    </div>
     <div class="notif-wrap" id="notif-wrap">
       <button class="notif-bell" onclick="toggleNotifPanel()">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
       <div class="notif-panel" id="notif-panel"></div>
@@ -643,6 +666,100 @@ tr:hover td{background:var(--bg)}
     <div class="filter-group"><span class="filter-label">Status</span><select class="filter-select" id="filter-status" onchange="renderAuditList()"><option value="">Todos</option><option>Não Iniciada</option><option>Em Andamento</option><option>Finalizada</option></select></div>
   </div>
   <div id="audit-list"></div>
+
+  <!-- ════ ANÁLISE INDIVIDUAL DA UNIDADE ════ -->
+  <div style="margin-top:32px;padding-top:24px;border-top:2px solid var(--border)">
+    <div class="page-actions" style="margin-bottom:20px">
+      <div><div class="card-title" style="font-size:1.1rem;display:flex;align-items:center;gap:8px">🔍 Análise Individual da Unidade</div><div class="card-subtitle">Indicadores detalhados, falhas recorrentes e conformidade por eixo</div></div>
+    </div>
+
+    <!-- Seleção de Unidade -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header"><div><div class="card-title">📍 Selecione a Unidade</div></div></div>
+      <div class="form-group">
+        <select class="form-select" id="analise-unidade-select" onchange="carregarAnaliseUnidade(this.value)" style="width:100%;max-width:400px">
+          <option value="">— Escolha uma unidade para análise —</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Alertas de Falhas Recorrentes -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header"><div><div class="card-title">⚠️ Falhas Recorrentes</div><div class="card-subtitle">Itens NC/PC mais frequentes nesta unidade</div></div></div>
+      <div id="analise-alertas-falhas" style="min-height:100px">
+        <div class="empty" style="padding:24px;text-align:center"><div class="empty-icon">🔍</div><div class="empty-text" style="color:var(--text3);font-size:.85rem">Selecione uma unidade para visualizar falhas recorrentes</div></div>
+      </div>
+    </div>
+
+    <!-- Indicadores de Conformidade -->
+    <div class="stats-grid" style="margin-bottom:20px" id="analise-indicadores">
+      <div class="stat-card green">
+        <div class="stat-label">Conformidade Média</div>
+        <div class="stat-value" id="analise-conf-media">—</div>
+        <div class="stat-sub">% de conformidade geral</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Auditorias Concluídas</div>
+        <div class="stat-value" id="analise-total-audit">0</div>
+        <div class="stat-sub">auditorias finalizadas</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Última Auditoria</div>
+        <div class="stat-value" id="analise-ultima-data">—</div>
+        <div class="stat-sub" id="analise-ultima-sub"></div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Evolução</div>
+        <div class="stat-value" id="analise-evolucao">—</div>
+        <div class="stat-sub">vs. auditoria anterior</div>
+      </div>
+    </div>
+
+    <!-- Conformidade por Eixo -->
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">📊 Conformidade por Eixo</div><div class="card-subtitle">Última auditoria finalizada</div></div></div>
+        <div id="analise-por-eixo" style="min-height:200px">
+          <div class="empty"><div class="empty-icon">📊</div><div class="empty-text" style="font-size:.85rem">Selecione uma unidade</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">📈 Evolução por Auditoria</div><div class="card-subtitle">Conformidade ao longo do tempo</div></div></div>
+        <div class="chart-container"><canvas id="chart-analise-evolucao"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Detalhes por Auditoria -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header"><div><div class="card-title">🎯 Resumo por Auditoria</div><div class="card-subtitle">Indicadores de C, PC, NC para cada auditoria da unidade</div></div></div>
+      <div style="overflow-x:auto">
+        <table id="analise-tabela-auditorias" style="font-size:.8rem">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Status</th>
+              <th style="text-align:center">C</th>
+              <th style="text-align:center">PC</th>
+              <th style="text-align:center">NC</th>
+              <th style="text-align:center">%</th>
+            </tr>
+          </thead>
+          <tbody id="analise-tbody-auditorias">
+            <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Selecione uma unidade</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Não Conformidades Críticas da Última Auditoria -->
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">🔴 NC Críticas — Última Auditoria</div><div class="card-subtitle">Itens não conformes que requerem ação imediata</div></div></div>
+      <div id="analise-nc-criticas" style="min-height:100px">
+        <div class="empty"><div class="empty-icon">✅</div><div class="empty-text" style="color:var(--text3);font-size:.85rem">Nenhuma NC crítica ou unidade não selecionada</div></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ════ SECTOR VIEW ════ -->
@@ -830,6 +947,121 @@ tr:hover td{background:var(--bg)}
   </div>
 </div>
 
+<!-- ════ INDICADORES AVANÇADOS ════ -->
+<div class="view" id="view-indicadores">
+  <div class="page-actions">
+    <div><div class="page-title">📊 Indicadores Avançados</div><div class="page-subtitle">Análise detalhada de conformidade e efetividade</div></div>
+  </div>
+  
+  <!-- INDICADORES DE TEMPO -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">⏱️ Indicadores de Tempo</div></div>
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Tempo Médio de Auditoria</div>
+        <div class="stat-value" id="ind-tempo-auditoria">—</div>
+        <div class="stat-sub" id="ind-tempo-auditoria-sub"></div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Tempo Médio para Encerramento</div>
+        <div class="stat-value" id="ind-tempo-encerramento">—</div>
+        <div class="stat-sub" id="ind-tempo-encerramento-sub"></div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Auditorias em Atraso</div>
+        <div class="stat-value" id="ind-atrasos">0</div>
+        <div class="stat-sub">acima de 30 dias</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Taxa de Conclusão</div>
+        <div class="stat-value" id="ind-taxa-conclusao">—</div>
+        <div class="stat-sub">do mês</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NÃO CONFORMIDADES -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">🔴 NC por Eixo</div></div>
+      <div id="ind-nc-eixo"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">🔴 NC por Unidade</div></div>
+      <div id="ind-nc-unidade"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">🔴 NC por Auditor</div></div>
+    <div id="ind-nc-auditor"></div>
+  </div>
+
+  <!-- REINCIDÊNCIA E EFETIVIDADE -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">🔁 Reincidência</div></div>
+      <div style="font-size:.9rem;color:var(--text2);line-height:2">
+        <div>Taxa de Reincidência: <strong id="ind-reincidencia-taxa">—</strong></div>
+        <div id="ind-reincidencia-top" style="margin-top:12px;border-top:1.5px solid var(--border);padding-top:12px"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">✅ Efetividade de Planos</div></div>
+      <div style="font-size:.9rem;color:var(--text2);line-height:2">
+        <div>Efetividade Geral: <strong id="ind-efetividade-geral">—</strong></div>
+        <div>Planos Implementados: <strong id="ind-efetividade-impl">0</strong></div>
+        <div>Planos Vencidos: <strong id="ind-efetividade-venc" style="color:var(--red)">0</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EFETIVIDADE POR EIXO E UNIDADE -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">✅ Efetividade por Eixo</div></div>
+      <div id="ind-efetividade-eixo"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">✅ Efetividade por Unidade</div></div>
+      <div id="ind-efetividade-unidade"></div>
+    </div>
+  </div>
+
+  <!-- INDICADORES DE MATURIDADE -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">📈 Indicadores de Evolução</div></div>
+    <div class="stats-grid">
+      <div class="stat-card green">
+        <div class="stat-label">% de Melhoria (YoY)</div>
+        <div class="stat-value" id="ind-melhoria">—</div>
+        <div class="stat-sub" id="ind-melhoria-sub"></div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">% de Regressão (YoY)</div>
+        <div class="stat-value" id="ind-regressao">—</div>
+        <div class="stat-sub" id="ind-regressao-sub"></div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Indicador de Estabilidade</div>
+        <div class="stat-value" id="ind-estabilidade">—</div>
+        <div class="stat-sub" id="ind-estabilidade-sub"></div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Indicador de Maturidade</div>
+        <div class="stat-value" id="ind-maturidade">—</div>
+        <div class="stat-sub" id="ind-maturidade-sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATRIZ DE ANÁLISE -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">📊 Matriz de Análise Completa</div></div>
+    <div id="ind-matriz" style="overflow-x:auto"></div>
+  </div>
+</div>
+
 <!-- ════ GALERIA DE EVIDÊNCIAS ════ -->
 <div class="view" id="view-galeria">
   <div class="page-actions">
@@ -894,7 +1126,20 @@ tr:hover td{background:var(--bg)}
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Unidade de Saúde *</label><select class="form-input filter-select" id="new-unidade" style="width:100%"><option value="">Selecione a unidade…</option></select></div>
-      <div class="form-group"><label class="form-label">Auditor Responsável *</label><input class="form-input" id="new-auditor" placeholder="Nome do auditor"></div>
+      <div class="form-group">
+        <label class="form-label">Auditores Responsáveis *</label>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--bg);border-radius:7px;border:1.5px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;color:var(--text2)">
+            <input type="checkbox" id="auditor-grazielle" value="Grazielle Rozzini">
+            👤 Grazielle Rozzini
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;color:var(--text2)">
+            <input type="checkbox" id="auditor-leticia" value="Leticia Lopes">
+            👤 Leticia Lopes
+          </label>
+        </div>
+        <div style="font-size:.75rem;color:var(--text3);margin-top:6px">Selecione pelo menos um auditor</div>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Data *</label><input class="form-input" type="date" id="new-data"></div>
@@ -927,24 +1172,95 @@ tr:hover td{background:var(--bg)}
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// FIREBASE — inicialização
+// FIREBASE — inicialização com fallback offline
 // ══════════════════════════════════════════════════════════════
-const firebaseConfig = {
-  apiKey: "AIzaSyBUFny4hEstRDeL847vZhLPRNu4MPN3kFI",
-  authDomain: "auditorias-a6085.firebaseapp.com",
-  projectId: "auditorias-a6085",
-  storageBucket: "auditorias-a6085.firebasestorage.app",
-  messagingSenderId: "34571822203",
-  appId: "1:34571822203:web:bdf5789f6720b339736ede",
-  measurementId: "G-23M3HBQYJZ"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+let db = null;
+let firebaseAvailable = false;
+
+try {
+  if(typeof firebase !== 'undefined') {
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUFny4hEstRDeL847vZhLPRNu4MPN3kFI",
+      authDomain: "auditorias-a6085.firebaseapp.com",
+      projectId: "auditorias-a6085",
+      storageBucket: "auditorias-a6085.firebasestorage.app",
+      messagingSenderId: "34571822203",
+      appId: "1:34571822203:web:bdf5789f6720b339736ede",
+      measurementId: "G-23M3HBQYJZ"
+    };
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    firebaseAvailable = true;
+    console.log('✓ Firebase conectado');
+  } else {
+    console.warn('⚠ Firebase não carregado, usando localStorage');
+  }
+} catch(e) {
+  console.warn('⚠ Erro ao conectar Firebase, usando localStorage offline:', e.message);
+}
+
 const COLL = 'auditorias'; // nome da coleção no Firestore
 
+// Fallback: se Firebase não estiver disponível, usar localStorage
+if(!firebaseAvailable || !db) {
+  db = {
+    collection: (name) => ({
+      orderBy: () => ({
+        get: async () => {
+          const data = JSON.parse(localStorage.getItem('aps_aud')||'[]');
+          return {
+            empty: data.length === 0,
+            docs: data.map(d => ({data: () => d}))
+          };
+        }
+      }),
+      add: async (doc) => {
+        const data = JSON.parse(localStorage.getItem('aps_aud')||'[]');
+        doc.id = 'aud_' + Date.now();
+        doc.createdAt = new Date().toISOString();
+        data.push(doc);
+        localStorage.setItem('aps_aud', JSON.stringify(data));
+        return {id: doc.id};
+      },
+      doc: (id) => ({
+        set: async (doc, opts) => {
+          const data = JSON.parse(localStorage.getItem('aps_aud')||'[]');
+          const idx = data.findIndex(d => d.id === id);
+          if(idx >= 0) {
+            data[idx] = {...data[idx], ...doc};
+            localStorage.setItem('aps_aud', JSON.stringify(data));
+          }
+        },
+        update: async (doc) => {
+          const data = JSON.parse(localStorage.getItem('aps_aud')||'[]');
+          const idx = data.findIndex(d => d.id === id);
+          if(idx >= 0) {
+            data[idx] = {...data[idx], ...doc};
+            localStorage.setItem('aps_aud', JSON.stringify(data));
+          }
+        }
+      })
+    })
+  };
+  console.log('✓ Usando localStorage como banco de dados local');
+}
+
 // ══════════════════════════════════════════════════════════════
-// Login removido — acesso aberto, sem autenticação
+// IDENTIFICAÇÃO DO AUDITOR - Sem Login
 // ══════════════════════════════════════════════════════════════
+const AUDITORES_SISTEMA = {
+  'GRAZIELLE.ROZZINI': 'Grazielle Rozzini',
+  'LETICIA.LOPES': 'Leticia Lopes'
+};
+
+// Detecta automaticamente qual auditor está preenchendo
+let auditorAtual = localStorage.getItem('auditorAtual') || 'Grazielle Rozzini';
+
+function definirAuditorAtual(nome){
+  auditorAtual = nome;
+  localStorage.setItem('auditorAtual', nome);
+  toast(`Auditor alterado para: ${nome}`, 'blue');
+}
 
 // Indicador visual de sincronização (injetado dinamicamente)
 function _setSyncStatus(status){
@@ -1939,6 +2255,7 @@ function showView(name){
   state.currentView = name;
   if(name==='dashboard') renderDashboard();
   if(name==='auditorias'){ renderAuditList(); updateFilters(); }
+  if(name==='indicadores') renderIndicadoresAvancados();
   if(name==='plano') renderPlano();
   if(name==='relatorio') renderRelatorio();
   if(name==='inteligencia') renderInteligencia();
@@ -2013,8 +2330,9 @@ function renderSectorItems(){
   // Mark as Em Andamento if needed
   if(a.status==='Não Iniciada'){ a.status='Em Andamento'; save(); }
 
+  const auditoresStr = Array.isArray(a.auditores) ? a.auditores.join(', ') : (a.auditor || '—');
   document.getElementById('sec-audit-info').innerHTML =
-    `🏥 <strong>${a.unidade}</strong><br>${fmtDate(a.data)} · ${a.tipo}<br>Auditor: ${a.auditor}`;
+    `🏥 <strong>${a.unidade}</strong><br>${fmtDate(a.data)} · ${a.tipo}<br>Auditores: ${auditoresStr}`;
 
   const isLocked = a.status==='Finalizada';
   const items = CHECKLIST_BASE.filter(i=>i.eixo===state.activeSector);
@@ -2031,10 +2349,22 @@ function renderSectorItems(){
           <button class="answer-btn answer-btn-c ${r.val==='C'?'sel':''}" onclick="responder('${item.id}','C')">C</button>
           <button class="answer-btn answer-btn-pc ${r.val==='PC'?'sel':''}" onclick="responder('${item.id}','PC')">PC</button>
           <button class="answer-btn answer-btn-nc ${r.val==='NC'?'sel':''}" onclick="responder('${item.id}','NC')">NC</button>
-        </div>`:`<span class="pill ${r.val==='C'?'pill-c':r.val==='PC'?'pill-pc':r.val==='NC'?'pill-nc':'pill-gray'}" style="margin-top:1px;flex-shrink:0">${r.val||'—'}</span>`}
+          <button class="answer-btn answer-btn-na ${r.val==='NA'?'sel':''}" onclick="responder('${item.id}','NA')">N/A</button>
+        </div>`:`<span class="pill ${r.val==='C'?'pill-c':r.val==='PC'?'pill-pc':r.val==='NC'?'pill-nc':r.val==='NA'?'pill-gray':'pill-gray'}" style="margin-top:1px;flex-shrink:0">${r.val||'—'}</span>`}
       </div>
-      <div class="obs-field${needObs?' vis':''}" id="obs-wrap-${item.id}">
-        <input type="text" class="form-input${needObs&&!r.obs?' obs-req':''}" placeholder="${needObs?'⚠ Observação obrigatória':'Observação'}" value="${r.obs||''}" onchange="salvarObs('${item.id}',this.value)" id="obs-${item.id}" style="font-size:.8rem" ${isLocked?'disabled':''}>
+      <div class="obs-field vis" id="obs-wrap-${item.id}">
+        <div class="obs-input-wrapper">
+          <input type="text" class="form-input${needObs&&!r.obs?' obs-req':''}" placeholder="${needObs?'⚠ Observação obrigatória':'Observação (opcional)'}" value="${r.obs||''}" onchange="salvarObs('${item.id}',this.value)" id="obs-${item.id}" style="font-size:.8rem" ${isLocked?'disabled':''}>
+          ${!isLocked?`<button class="obs-photo-btn" onclick="triggerPhotoInput('${item.id}')" title="Adicionar foto">📷</button>`:''}
+        </div>
+        <input type="file" id="obs-file-${item.id}" class="obs-file-input" accept="image/*" onchange="adicionarFoto('${item.id}')">
+        <div class="obs-photo-container${r.foto?' has-photo':''}" id="obs-photo-${item.id}">
+          ${r.foto?`<div class="obs-photo-preview">
+            <img src="${r.foto}" alt="Foto da observação">
+            ${!isLocked?'<button class="obs-photo-remove" onclick="removerFoto(\'${item.id}\')">✕</button>':''}
+          </div>
+          <span class="obs-photo-label">Foto adicionada</span>`:''}
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -2050,22 +2380,31 @@ function responder(itemId, val){
   if(!a.respostas) a.respostas={};
   if(!a.respostas[itemId]) a.respostas[itemId]={};
   a.respostas[itemId].val = val;
+  
+  // Registrar quem preencheu e quando
+  if(!a.preenchidoPor) a.preenchidoPor={};
+  a.preenchidoPor[itemId] = {
+    auditor: auditorAtual,
+    data: new Date().toISOString()
+  };
+  
   save();
 
   const el = document.getElementById('ci-'+itemId);
   el.className = 'checklist-item answered-'+val.toLowerCase().replace(' ','');
   el.querySelectorAll('.answer-btn').forEach(b=>b.classList.remove('sel'));
-  const cls = val==='C'?'answer-btn-c':val==='PC'?'answer-btn-pc':'answer-btn-nc';
+  const cls = val==='C'?'answer-btn-c':val==='PC'?'answer-btn-pc':val==='NC'?'answer-btn-nc':'answer-btn-na';
   el.querySelector('.'+cls).classList.add('sel');
 
   const obsWrap = document.getElementById('obs-wrap-'+itemId);
   const obsInput = document.getElementById('obs-'+itemId);
+  // Campo de observação SEMPRE visível, mas obrigatório apenas para PC e NC
+  obsWrap.classList.add('vis');
   if(val==='PC'||val==='NC'){
-    obsWrap.classList.add('vis');
     obsInput.placeholder='⚠ Observação obrigatória';
     if(!a.respostas[itemId].obs) obsInput.classList.add('obs-req');
   } else {
-    obsWrap.classList.remove('vis');
+    obsInput.placeholder='Observação (opcional)';
     obsInput.classList.remove('obs-req');
   }
   updateSectorScore();
@@ -2080,6 +2419,45 @@ function salvarObs(itemId, val){
   a.respostas[itemId].obs = val;
   if(val) document.getElementById('obs-'+itemId).classList.remove('obs-req');
   save();
+}
+
+function triggerPhotoInput(itemId){
+  document.getElementById('obs-file-'+itemId).click();
+}
+
+function adicionarFoto(itemId){
+  const fileInput = document.getElementById('obs-file-'+itemId);
+  const file = fileInput.files[0];
+  if(!file) return;
+  
+  if(file.size > 5242880){ // 5MB
+    toast('Arquivo muito grande (máx. 5MB)','red');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const a = getAudit(state.sectorAuditId);
+    if(!a) return;
+    if(!a.respostas) a.respostas={};
+    if(!a.respostas[itemId]) a.respostas[itemId]={};
+    a.respostas[itemId].foto = e.target.result;
+    save();
+    renderSectorItems();
+    toast('Foto adicionada com sucesso!','green');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerFoto(itemId){
+  const a = getAudit(state.sectorAuditId);
+  if(!a) return;
+  if(!a.respostas) a.respostas={};
+  if(!a.respostas[itemId]) a.respostas[itemId]={};
+  delete a.respostas[itemId].foto;
+  save();
+  renderSectorItems();
+  toast('Foto removida','yellow');
 }
 
 function updateSectorScore(){
@@ -2138,7 +2516,8 @@ function calcAxisScore(a, axis){
     if(!r||!r.val) return;
     if(r.val==='C') c++;
     else if(r.val==='PC') pc++;
-    else nc++;
+    else if(r.val==='NC') nc++;
+    // N/A é ignorado na contagem (não afeta score)
   });
   const answered=c+pc+nc;
   const score=c*1+pc*0.5;
@@ -2150,7 +2529,10 @@ function calcScore(a){
   CHECKLIST_BASE.forEach(item=>{
     const r=(a.respostas||{})[item.id];
     if(!r||!r.val) return;
-    if(r.val==='C') c++; else if(r.val==='PC') pc++; else nc++;
+    if(r.val==='C') c++; 
+    else if(r.val==='PC') pc++; 
+    else if(r.val==='NC') nc++;
+    // N/A é ignorado na contagem (não afeta score)
   });
   const total=CHECKLIST_BASE.length;
   return {c,pc,nc,total,score:c*1+pc*0.5,answered:c+pc+nc};
@@ -2309,21 +2691,49 @@ function refreshAllViews(){
 // ══════════════════════════════════════════════════════════════
 function criarAuditoria(){
   const unidade=document.getElementById('new-unidade').value.trim();
-  const auditor=document.getElementById('new-auditor').value.trim();
   const data=document.getElementById('new-data').value;
   const tipo=document.getElementById('new-tipo').value;
   const obs=document.getElementById('new-obs').value.trim();
-  if(!unidade||!auditor||!data){ toast('Preencha todos os campos obrigatórios','red'); return; }
+  
+  // Obter auditores selecionados
+  const auditores = [];
+  if(document.getElementById('auditor-grazielle').checked) auditores.push('Grazielle Rozzini');
+  if(document.getElementById('auditor-leticia').checked) auditores.push('Leticia Lopes');
+  
+  if(!unidade||!auditores.length||!data){ 
+    toast('Preencha todos os campos obrigatórios','red'); 
+    return; 
+  }
+  
   const audit={
-    id:'aud_'+Date.now(), unidade, auditor, data, tipo, obs,
-    status:'Não Iniciada', respostas:{}, acoes:{},
+    id:'aud_'+Date.now(), 
+    unidade, 
+    auditores, // Agora é uma lista
+    data, 
+    tipo, 
+    obs,
+    status:'Não Iniciada', 
+    respostas:{}, 
+    acoes:{},
+    preenchidoPor: {}, // Rastreamento de quem preencheu cada resposta
     createdAt:new Date().toISOString()
   };
+  
   state.auditorias.unshift(audit);
   save();
   closeModal('modal-nova-auditoria');
+  
+  // Limpar formulário
+  document.getElementById('new-unidade').value='';
+  document.getElementById('auditor-grazielle').checked=false;
+  document.getElementById('auditor-leticia').checked=false;
+  document.getElementById('new-data').value='';
+  document.getElementById('new-tipo').value='Rotina';
+  document.getElementById('new-obs').value='';
+  
   toast('Auditoria criada!','green');
   refreshAllViews();
+  
   // Auto-open in current sector if on sector view
   if(state.currentView==='sector'){
     state.sectorAuditId = audit.id;
@@ -2635,6 +3045,9 @@ function populateGaleriaFilters(){
 // DASHBOARD
 // ══════════════════════════════════════════════════════════════
 let chartEv=null,chartEix=null;
+let chartCiAnual=null, chartCiMensal=null;
+let chartUdEvo=null;
+let chartCmpUnidade=null,chartCmpAno=null;
 
 // ── Unit-level priority stats (used by "Onde Preciso Agir Hoje" + executive cards) ──
 function computeUnitPriorityStats(scoped){
@@ -2799,15 +3212,27 @@ function renderDashboard(){
 }
 
 function buildEvoChart(fin){
+  if(typeof Chart === 'undefined'){
+    console.warn('Chart.js não está carregado ainda');
+    return;
+  }
   const ctx=document.getElementById('chart-evolucao');
+  if(!ctx){
+    console.warn('Elemento chart-evolucao não encontrado');
+    return;
+  }
   if(chartEv){chartEv.destroy();chartEv=null;}
   if(!fin.length) return;
-  const mo={};
-  fin.forEach(a=>{const m=a.data.substring(0,7);const s=calcScore(a);if(!mo[m]){mo[m]={t:0,n:0}}mo[m].t+=s.total>0?Math.round((s.score/s.total)*100):0;mo[m].n++;});
-  const labels=Object.keys(mo).sort().slice(-6);
-  const data=labels.map(m=>Math.round(mo[m].t/mo[m].n));
-  const mNames=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  chartEv=new Chart(ctx,{type:'line',data:{labels:labels.map(m=>{const p=m.split('-');return mNames[parseInt(p[1])-1]+'/'+p[0].slice(2)}),datasets:[{label:'%',data,borderColor:'#0057b8',backgroundColor:'rgba(0,87,184,.1)',tension:.35,fill:true,pointBackgroundColor:'#0057b8',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+  try {
+    const mo={};
+    fin.forEach(a=>{const m=a.data.substring(0,7);const s=calcScore(a);if(!mo[m]){mo[m]={t:0,n:0}}mo[m].t+=s.total>0?Math.round((s.score/s.total)*100):0;mo[m].n++;});
+    const labels=Object.keys(mo).sort().slice(-6);
+    const data=labels.map(m=>Math.round(mo[m].t/mo[m].n));
+    const mNames=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    chartEv=new Chart(ctx,{type:'line',data:{labels:labels.map(m=>{const p=m.split('-');return mNames[parseInt(p[1])-1]+'/'+p[0].slice(2)}),datasets:[{label:'%',data,borderColor:'#0057b8',backgroundColor:'rgba(0,87,184,.1)',tension:.35,fill:true,pointBackgroundColor:'#0057b8',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+  } catch(e) {
+    console.error('Erro ao criar gráfico:', e);
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2851,7 +3276,7 @@ function renderRelatorio(){
     </div>
     <div class="section-title">Conformidade por Eixo</div>
     ${axSummary.map(({ax,score:s,answered})=>{const p=Math.round((s/answered)*100);return`<div class="progress-wrap" style="margin:5px 0"><span class="progress-label">${SECTOR_ICONS[ax]||''} ${ax}</span><div class="progress-bar"><div class="progress-fill ${scoreClass(p)}" style="width:${p}%"></div></div><span class="progress-pct" style="color:${scoreColor(p)}">${p}%</span></div>`;}).join('')}
-    ${ncs.length||pcs.length?`<div class="divider"></div><div class="section-title">Não Conformidades e Parciais</div><table><thead><tr><th>Eixo</th><th>Requisito</th><th>Classif.</th><th>Observação</th></tr></thead><tbody>${[...ncs,...pcs].map(item=>{const r=a.respostas[item.id];return`<tr><td><span class="pill pill-blue">${item.eixo}</span></td><td style="font-size:.8rem">${item.req}</td><td><span class="pill ${r.val==='NC'?'pill-nc':'pill-pc'}">${r.val}</span></td><td style="font-size:.8rem;color:var(--text3)">${r.obs||'—'}</td></tr>`;}).join('')}</tbody></table>`:''}
+    ${ncs.length||pcs.length?`<div class="divider"></div><div class="section-title">Não Conformidades e Parciais</div><table><thead><tr><th>Eixo</th><th>Requisito</th><th>Classif.</th><th>Observação</th><th>Preenchido por</th></tr></thead><tbody>${[...ncs,...pcs].map(item=>{const r=a.respostas[item.id];const prep=a.preenchidoPor?a.preenchidoPor[item.id]:null;return`<tr><td><span class="pill pill-blue">${item.eixo}</span></td><td style="font-size:.8rem">${item.req}</td><td><span class="pill ${r.val==='NC'?'pill-nc':'pill-pc'}">${r.val}</span></td><td style="font-size:.8rem;color:var(--text3)">${r.obs||'—'}${r.foto?'<br><img src="'+r.foto+'" style="margin-top:6px;max-width:150px;max-height:150px;border-radius:4px;" />':''}</td><td style="font-size:.8rem;color:var(--text3)">${prep?'👤 '+prep.auditor:'-'}</td></tr>`;}).join('')}</tbody></table>`:''}
     ${a.obs?`<div class="divider"></div><div class="section-title">Obs. Gerais</div><p style="font-size:.855rem;color:var(--text2)">${a.obs}</p>`:''}
   </div>`;
 }
@@ -2905,7 +3330,6 @@ function gerarAnaliseCritica(){
 // ══════════════════════════════════════════════════════════════
 // CENTRAL DE INTELIGÊNCIA
 // ══════════════════════════════════════════════════════════════
-let chartCiAnual=null, chartCiMensal=null;
 
 function ciFinAudits(){ return state.auditorias.filter(a=>a.status==='Finalizada'); }
 function ciPct(a){ const s=calcScore(a); return s.total>0?Math.round((s.score/s.total)*100):null; }
@@ -3005,14 +3429,20 @@ function renderInteligencia(){
   fin.forEach(a=>{const y=(a.data||'').slice(0,4); const p=ciPct(a); if(!y||p===null) return; if(!byYear[y]) byYear[y]={t:0,n:0}; byYear[y].t+=p; byYear[y].n++;});
   const years=Object.keys(byYear).sort();
   if(chartCiAnual){chartCiAnual.destroy();chartCiAnual=null;}
-  if(years.length){
-    chartCiAnual=new Chart(document.getElementById('chart-ci-anual'),{type:'bar',data:{labels:years,datasets:[{label:'%',data:years.map(y=>Math.round(byYear[y].t/byYear[y].n)),backgroundColor:'#0057b8',borderRadius:6,maxBarThickness:56}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+  if(years.length && typeof Chart !== 'undefined'){
+    try {
+      chartCiAnual=new Chart(document.getElementById('chart-ci-anual'),{type:'bar',data:{labels:years,datasets:[{label:'%',data:years.map(y=>Math.round(byYear[y].t/byYear[y].n)),backgroundColor:'#0057b8',borderRadius:6,maxBarThickness:56}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+    } catch(e) { console.error('Erro gráfico anual:', e); }
   }
 
   // ── Comparativo mensal (12 meses) ──
   const monthly12=ciMonthlyBuckets(fin,12);
   if(chartCiMensal){chartCiMensal.destroy();chartCiMensal=null;}
-  chartCiMensal=new Chart(document.getElementById('chart-ci-mensal'),{type:'bar',data:{labels:monthly12.map(m=>m.label),datasets:[{label:'%',data:monthly12.map(m=>m.pct??0),backgroundColor:monthly12.map(m=>m.pct===null?'#d1dce8':(m.pct>=80?'#16a34a':m.pct>=60?'#ca8a04':'#dc2626')),borderRadius:6,maxBarThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+  if(typeof Chart !== 'undefined'){
+    try {
+      chartCiMensal=new Chart(document.getElementById('chart-ci-mensal'),{type:'bar',data:{labels:monthly12.map(m=>m.label),datasets:[{label:'%',data:monthly12.map(m=>m.pct??0),backgroundColor:monthly12.map(m=>m.pct===null?'#d1dce8':(m.pct>=80?'#16a34a':m.pct>=60?'#ca8a04':'#dc2626')),borderRadius:6,maxBarThickness:28}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+    } catch(e) { console.error('Erro gráfico mensal:', e); }
+  }
 
   // ── Mapa de calor Unidade × Eixo ──
   renderCiHeatmap();
@@ -3138,7 +3568,6 @@ function renderTimelineHTML(steps){
 // ══════════════════════════════════════════════════════════════
 // PÁGINA EXCLUSIVA DA UNIDADE
 // ══════════════════════════════════════════════════════════════
-let chartUdEvo=null;
 
 function openUnitDetail(unit){
   if(state.currentView!=='unidade-detail') state.unitDetailReturn=state.currentView;
@@ -3184,8 +3613,10 @@ function renderUnidadeDetail(unit){
 
   // Evolução
   if(chartUdEvo){chartUdEvo.destroy();chartUdEvo=null;}
-  if(finAuditsAsc.length){
-    chartUdEvo=new Chart(document.getElementById('chart-ud-evolucao'),{type:'line',data:{labels:finAuditsAsc.map(a=>fmtDate(a.data)),datasets:[{label:'%',data:finAuditsAsc.map(a=>ciPct(a)),borderColor:'#0057b8',backgroundColor:'rgba(0,87,184,.1)',tension:.35,fill:true,pointBackgroundColor:'#0057b8',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+  if(finAuditsAsc.length && typeof Chart !== 'undefined'){
+    try {
+      chartUdEvo=new Chart(document.getElementById('chart-ud-evolucao'),{type:'line',data:{labels:finAuditsAsc.map(a=>fmtDate(a.data)),datasets:[{label:'%',data:finAuditsAsc.map(a=>ciPct(a)),borderColor:'#0057b8',backgroundColor:'rgba(0,87,184,.1)',tension:.35,fill:true,pointBackgroundColor:'#0057b8',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+    } catch(e) { console.error('Erro gráfico evolução unidade:', e); }
   }
 
   // Comparação com a rede
@@ -3421,8 +3852,6 @@ function unitSummary(unit){
   return {unit,pct,nc,total:audits.length,eixoPct};
 }
 
-let chartCmpUnidade=null,chartCmpAno=null;
-
 function compararUnidades(){
   const uA=document.getElementById('cmp-unidade-a').value, uB=document.getElementById('cmp-unidade-b').value;
   if(!uA||!uB){ toast('Selecione as duas unidades','red'); return; }
@@ -3436,11 +3865,13 @@ function compararUnidades(){
   `;
   const axesComData=AXES.filter(ax=>A.eixoPct.find(x=>x.ax===ax)?.avg!==null||B.eixoPct.find(x=>x.ax===ax)?.avg!==null);
   if(chartCmpUnidade){chartCmpUnidade.destroy();chartCmpUnidade=null;}
-  if(axesComData.length){
-    chartCmpUnidade=new Chart(document.getElementById('chart-cmp-unidade'),{type:'bar',data:{labels:axesComData,datasets:[
-      {label:uA,data:axesComData.map(ax=>A.eixoPct.find(x=>x.ax===ax)?.avg??0),backgroundColor:'#0057b8',borderRadius:5},
-      {label:uB,data:axesComData.map(ax=>B.eixoPct.find(x=>x.ax===ax)?.avg??0),backgroundColor:'#ca8a04',borderRadius:5}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom'}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{autoSkip:false,maxRotation:60,minRotation:30,font:{size:9}}}}}});
+  if(axesComData.length && typeof Chart !== 'undefined'){
+    try {
+      chartCmpUnidade=new Chart(document.getElementById('chart-cmp-unidade'),{type:'bar',data:{labels:axesComData,datasets:[
+        {label:uA,data:axesComData.map(ax=>A.eixoPct.find(x=>x.ax===ax)?.avg??0),backgroundColor:'#0057b8',borderRadius:5},
+        {label:uB,data:axesComData.map(ax=>B.eixoPct.find(x=>x.ax===ax)?.avg??0),backgroundColor:'#ca8a04',borderRadius:5}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom'}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{autoSkip:false,maxRotation:60,minRotation:30,font:{size:9}}}}}});
+    } catch(e) { console.error('Erro gráfico comparação unidades:', e); }
   }
 }
 
@@ -3463,11 +3894,13 @@ function compararAnos(){
   const axAvg=(fin,ax)=>{const ss=fin.map(a=>calcAxisScore(a,ax)).filter(s=>s.answered>0);return ss.length?Math.round(ss.reduce((acc,s)=>acc+(s.score/s.answered)*100,0)/ss.length):null;};
   const axesComData=AXES.filter(ax=>axAvg(finA,ax)!==null||axAvg(finB,ax)!==null);
   if(chartCmpAno){chartCmpAno.destroy();chartCmpAno=null;}
-  if(axesComData.length){
-    chartCmpAno=new Chart(document.getElementById('chart-cmp-ano'),{type:'bar',data:{labels:axesComData,datasets:[
-      {label:yA,data:axesComData.map(ax=>axAvg(finA,ax)??0),backgroundColor:'#0057b8',borderRadius:5},
-      {label:yB,data:axesComData.map(ax=>axAvg(finB,ax)??0),backgroundColor:'#16a34a',borderRadius:5}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom'}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{autoSkip:false,maxRotation:60,minRotation:30,font:{size:9}}}}}});
+  if(axesComData.length && typeof Chart !== 'undefined'){
+    try {
+      chartCmpAno=new Chart(document.getElementById('chart-cmp-ano'),{type:'bar',data:{labels:axesComData,datasets:[
+        {label:yA,data:axesComData.map(ax=>axAvg(finA,ax)??0),backgroundColor:'#0057b8',borderRadius:5},
+        {label:yB,data:axesComData.map(ax=>axAvg(finB,ax)??0),backgroundColor:'#16a34a',borderRadius:5}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom'}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{autoSkip:false,maxRotation:60,minRotation:30,font:{size:9}}}}}});
+    } catch(e) { console.error('Erro gráfico comparação anos:', e); }
   }
 }
 
@@ -3566,6 +3999,490 @@ function _showLoading(v){
   el.style.display=v?'flex':'none';
 }
 
+// ══════════════════════════════════════════════════════════════
+// INDICADORES AVANÇADOS
+// ══════════════════════════════════════════════════════════════
+function renderIndicadoresAvancados(){
+  const fin = state.auditorias.filter(a => a.status === 'Finalizada');
+  const todas = state.auditorias;
+  
+  // ── Tempo ──
+  let tempoMedioAuditoria = 0;
+  if(fin.length > 0) {
+    const tempos = fin.map(a => {
+      const inicio = new Date(a.createdAt);
+      const fim = new Date(a.finishedAt || a.createdAt);
+      return (fim - inicio) / (1000 * 60 * 60); // em horas
+    });
+    tempoMedioAuditoria = Math.round(tempos.reduce((a,b) => a+b, 0) / tempos.length);
+  }
+  
+  let tempoMedioEncerramento = 0;
+  if(fin.length > 0) {
+    const tempos = fin.map(a => {
+      const data = new Date(a.data);
+      const fim = new Date(a.finishedAt || a.createdAt);
+      return (fim - data) / (1000 * 60 * 60 * 24); // em dias
+    });
+    tempoMedioEncerramento = Math.round(tempos.reduce((a,b) => a+b, 0) / tempos.length);
+  }
+  
+  // Atrasos
+  const hoje = new Date();
+  const atrasos = todas.filter(a => {
+    if(a.status === 'Finalizada') return false;
+    const dataAud = new Date(a.data);
+    const dias = (hoje - dataAud) / (1000 * 60 * 60 * 24);
+    return dias > 30;
+  }).length;
+  
+  // Taxa de conclusão do mês
+  const nowYM = hoje.toISOString().slice(0, 7);
+  const mesAtuais = todas.filter(a => (a.data || '').startsWith(nowYM));
+  const mesConcluidas = mesAtuais.filter(a => a.status === 'Finalizada').length;
+  const taxaConclusao = mesAtuais.length > 0 ? Math.round((mesConcluidas / mesAtuais.length) * 100) : 0;
+  
+  document.getElementById('ind-tempo-auditoria').textContent = tempoMedioAuditoria + 'h';
+  document.getElementById('ind-tempo-auditoria-sub').textContent = 'média por auditoria';
+  document.getElementById('ind-tempo-encerramento').textContent = tempoMedioEncerramento + 'd';
+  document.getElementById('ind-tempo-encerramento-sub').textContent = 'data da auditoria até conclusão';
+  document.getElementById('ind-atrasos').textContent = atrasos;
+  document.getElementById('ind-taxa-conclusao').textContent = taxaConclusao + '%';
+  
+  // ── NC por Eixo ──
+  const ncPorEixo = {};
+  AXES.forEach(eixo => {
+    const ncs = fin.reduce((acc, a) => {
+      return acc + CHECKLIST_BASE.filter(i => i.eixo === eixo && (a.respostas || {})[i.id]?.val === 'NC').length;
+    }, 0);
+    if(ncs > 0) ncPorEixo[eixo] = ncs;
+  });
+  
+  const ncEixoHtml = Object.entries(ncPorEixo).sort((a,b) => b[1] - a[1]).slice(0, 5)
+    .map(([eixo, count]) => `<div style="margin:6px 0;display:flex;justify-content:space-between">
+      <span>${SECTOR_ICONS[eixo] || ''} ${eixo}</span>
+      <strong style="color:var(--red)">${count}</strong>
+    </div>`).join('');
+  document.getElementById('ind-nc-eixo').innerHTML = ncEixoHtml || '<div style="color:var(--text3)">Sem não conformidades</div>';
+  
+  // ── NC por Unidade ──
+  const ncPorUnidade = {};
+  fin.forEach(a => {
+    const ncs = CHECKLIST_BASE.filter(i => (a.respostas || {})[i.id]?.val === 'NC').length;
+    if(ncs > 0) {
+      if(!ncPorUnidade[a.unidade]) ncPorUnidade[a.unidade] = 0;
+      ncPorUnidade[a.unidade] += ncs;
+    }
+  });
+  
+  const ncUnidadeHtml = Object.entries(ncPorUnidade).sort((a,b) => b[1] - a[1]).slice(0, 5)
+    .map(([unidade, count]) => `<div style="margin:6px 0;display:flex;justify-content:space-between">
+      <span>🏥 ${unidade}</span>
+      <strong style="color:var(--red)">${count}</strong>
+    </div>`).join('');
+  document.getElementById('ind-nc-unidade').innerHTML = ncUnidadeHtml || '<div style="color:var(--text3)">Sem não conformidades</div>';
+  
+  // ── NC por Auditor ──
+  const ncPorAuditor = {};
+  fin.forEach(a => {
+    const auditores = Array.isArray(a.auditores) ? a.auditores : [a.auditor || 'N/D'];
+    auditores.forEach(auditor => {
+      const ncs = CHECKLIST_BASE.filter(i => {
+        const prep = (a.preenchidoPor || {})[i.id];
+        return (a.respostas || {})[i.id]?.val === 'NC' && prep?.auditor === auditor;
+      }).length;
+      if(ncs > 0) {
+        if(!ncPorAuditor[auditor]) ncPorAuditor[auditor] = 0;
+        ncPorAuditor[auditor] += ncs;
+      }
+    });
+  });
+  
+  const ncAuditorHtml = Object.entries(ncPorAuditor).sort((a,b) => b[1] - a[1])
+    .map(([auditor, count]) => `<div style="margin:6px 0;display:flex;justify-content:space-between">
+      <span>👤 ${auditor}</span>
+      <strong style="color:var(--red)">${count}</strong>
+    </div>`).join('');
+  document.getElementById('ind-nc-auditor').innerHTML = ncAuditorHtml || '<div style="color:var(--text3)">Sem não conformidades identificadas</div>';
+  
+  // ── Reincidência ──
+  if(fin.length >= 2) {
+    const hist = [];
+    const byUnit = {};
+    fin.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+    fin.forEach(a => {
+      if(!byUnit[a.unidade]) byUnit[a.unidade] = [];
+      byUnit[a.unidade].push(a);
+    });
+    
+    let totalReincidentes = 0;
+    let totalNCs = 0;
+    const top = [];
+    
+    Object.entries(byUnit).forEach(([unidade, audits]) => {
+      for(let i = 1; i < audits.length; i++) {
+        const atual = audits[i];
+        const anterior = audits[i - 1];
+        const ncsAtual = CHECKLIST_BASE.filter(item => (atual.respostas || {})[item.id]?.val === 'NC');
+        const reincidentes = ncsAtual.filter(item => {
+          const r = (anterior.respostas || {})[item.id];
+          return r && (r.val === 'NC' || r.val === 'PC');
+        });
+        if(reincidentes.length > 0) {
+          totalReincidentes += reincidentes.length;
+          totalNCs += ncsAtual.length;
+          top.push({ unidade, count: reincidentes.length });
+        }
+      }
+    });
+    
+    const taxaReincidencia = totalNCs > 0 ? Math.round((totalReincidentes / totalNCs) * 100) : 0;
+    document.getElementById('ind-reincidencia-taxa').textContent = taxaReincidencia + '%';
+    
+    const topReincHtml = top.sort((a,b) => b.count - a.count).slice(0, 5)
+      .map(item => `<div style="font-size:.85rem;margin:4px 0">🏥 ${item.unidade}: <strong>${item.count}</strong></div>`).join('');
+    document.getElementById('ind-reincidencia-top').innerHTML = topReincHtml ? '<div style="margin-top:8px;font-size:.85rem;font-weight:600;margin-bottom:6px">Top Reincidências:</div>' + topReincHtml : '';
+  } else {
+    document.getElementById('ind-reincidencia-taxa').textContent = '—';
+  }
+  
+  // ── Efetividade de Planos ──
+  let totalAcoes = 0;
+  let acoesImpl = 0;
+  let acoesVenc = 0;
+  todas.forEach(a => {
+    Object.values(a.acoes || {}).forEach(acao => {
+      totalAcoes++;
+      if(acao.status === 'Implementada') acoesImpl++;
+      if(acao.status === 'Pendente' && acao.prazo && new Date(acao.prazo) < new Date()) acoesVenc++;
+    });
+  });
+  
+  const efetividadeGeral = totalAcoes > 0 ? Math.round((acoesImpl / totalAcoes) * 100) : 0;
+  document.getElementById('ind-efetividade-geral').textContent = efetividadeGeral + '%';
+  document.getElementById('ind-efetividade-impl').textContent = acoesImpl;
+  document.getElementById('ind-efetividade-venc').textContent = acoesVenc;
+  
+  // ── Efetividade por Eixo ──
+  const efEixo = {};
+  AXES.forEach(eixo => {
+    let totalE = 0, implE = 0;
+    fin.forEach(a => {
+      CHECKLIST_BASE.filter(i => i.eixo === eixo && (a.respostas || {})[i.id]?.val === 'NC').forEach(item => {
+        const acao = a.acoes?.[item.id];
+        if(acao) {
+          totalE++;
+          if(acao.status === 'Implementada') implE++;
+        }
+      });
+    });
+    if(totalE > 0) efEixo[eixo] = Math.round((implE / totalE) * 100);
+  });
+  
+  const efEixoHtml = Object.entries(efEixo).sort((a,b) => b[1] - a[1]).slice(0, 5)
+    .map(([eixo, pct]) => `<div style="margin:8px 0">
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:3px">
+        <span>${SECTOR_ICONS[eixo] || ''} ${eixo}</span>
+        <strong>${pct}%</strong>
+      </div>
+      <div class="progress-bar"><div class="progress-fill green" style="width:${pct}%"></div></div>
+    </div>`).join('');
+  document.getElementById('ind-efetividade-eixo').innerHTML = efEixoHtml || '<div style="color:var(--text3);font-size:.85rem">Sem dados</div>';
+  
+  // ── Efetividade por Unidade ──
+  const efUnidade = {};
+  fin.forEach(a => {
+    let totalU = 0, implU = 0;
+    CHECKLIST_BASE.filter(i => (a.respostas || {})[i.id]?.val === 'NC').forEach(item => {
+      const acao = a.acoes?.[item.id];
+      if(acao) {
+        totalU++;
+        if(acao.status === 'Implementada') implU++;
+      }
+    });
+    if(totalU > 0) efUnidade[a.unidade] = Math.round((implU / totalU) * 100);
+  });
+  
+  const efUnidadeHtml = Object.entries(efUnidade).sort((a,b) => b[1] - a[1]).slice(0, 5)
+    .map(([unidade, pct]) => `<div style="margin:8px 0">
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:3px">
+        <span>🏥 ${unidade}</span>
+        <strong>${pct}%</strong>
+      </div>
+      <div class="progress-bar"><div class="progress-fill green" style="width:${pct}%"></div></div>
+    </div>`).join('');
+  document.getElementById('ind-efetividade-unidade').innerHTML = efUnidadeHtml || '<div style="color:var(--text3);font-size:.85rem">Sem dados</div>';
+  
+  // ── Melhoria e Regressão (YoY) ──
+  const hoje2 = new Date();
+  const anoPassado = new Date(hoje2.getFullYear() - 1, hoje2.getMonth(), hoje2.getDate());
+  
+  const finAnoAtual = fin.filter(a => new Date(a.finishedAt) >= anoPassado);
+  const mesesAtual = {};
+  finAnoAtual.forEach(a => {
+    const m = a.finishedAt.substring(0, 7);
+    if(!mesesAtual[m]) mesesAtual[m] = [];
+    mesesAtual[m].push(calcScore(a));
+  });
+  
+  let pctMelhoria = 0, pctRegressao = 0;
+  const mesesOrdenados = Object.keys(mesesAtual).sort().slice(-12);
+  if(mesesOrdenados.length >= 2) {
+    const mesPrimeiro = mesesAtual[mesesOrdenados[0]];
+    const mesUltimo = mesesAtual[mesesOrdenados[mesesOrdenados.length - 1]];
+    if(mesPrimeiro.length > 0 && mesUltimo.length > 0) {
+      const pctPrimeiro = Math.round(mesPrimeiro.reduce((a, s) => a + (s.total > 0 ? (s.score / s.total) * 100 : 0), 0) / mesPrimeiro.length);
+      const pctUltimo = Math.round(mesUltimo.reduce((a, s) => a + (s.total > 0 ? (s.score / s.total) * 100 : 0), 0) / mesUltimo.length);
+      const delta = pctUltimo - pctPrimeiro;
+      if(delta > 0) pctMelhoria = delta;
+      if(delta < 0) pctRegressao = Math.abs(delta);
+    }
+  }
+  
+  document.getElementById('ind-melhoria').textContent = pctMelhoria > 0 ? '+' + pctMelhoria + '%' : '—';
+  document.getElementById('ind-melhoria-sub').textContent = 'últimos 12 meses';
+  document.getElementById('ind-regressao').textContent = pctRegressao > 0 ? '-' + pctRegressao + '%' : '—';
+  document.getElementById('ind-regressao-sub').textContent = 'últimos 12 meses';
+  
+  // ── Indicador de Estabilidade ──
+  let estabilidade = 'Baixa';
+  let estabilidadeColor = 'var(--red)';
+  if(mesesOrdenados.length >= 3) {
+    const ultimos3 = mesesOrdenados.slice(-3).map(m => {
+      const scores = mesesAtual[m];
+      return Math.round(scores.reduce((a, s) => a + (s.total > 0 ? (s.score / s.total) * 100 : 0), 0) / scores.length);
+    });
+    const variacao = Math.max(...ultimos3) - Math.min(...ultimos3);
+    if(variacao < 5) { estabilidade = 'Alta'; estabilidadeColor = 'var(--green)'; }
+    else if(variacao < 15) { estabilidade = 'Média'; estabilidadeColor = 'var(--yellow)'; }
+  }
+  document.getElementById('ind-estabilidade').textContent = estabilidade;
+  document.getElementById('ind-estabilidade-sub').textContent = 'variação últimos 3 meses';
+  document.querySelector('#ind-estabilidade').style.color = estabilidadeColor;
+  
+  // ── Indicador de Maturidade ──
+  let maturidade = 'Nível 1';
+  let maturidadeDesc = 'Ad-hoc';
+  const confGeral = fin.length > 0 ? Math.round(fin.reduce((a, audit) => {
+    const s = calcScore(audit);
+    return a + (s.total > 0 ? (s.score / s.total) * 100 : 0);
+  }, 0) / fin.length) : 0;
+  
+  if(confGeral >= 90) { maturidade = 'Nível 5'; maturidadeDesc = 'Otimizado'; }
+  else if(confGeral >= 80) { maturidade = 'Nível 4'; maturidadeDesc = 'Gerenciado'; }
+  else if(confGeral >= 70) { maturidade = 'Nível 3'; maturidadeDesc = 'Definido'; }
+  else if(confGeral >= 60) { maturidade = 'Nível 2'; maturidadeDesc = 'Repetível'; }
+  
+  document.getElementById('ind-maturidade').textContent = maturidade;
+  document.getElementById('ind-maturidade-sub').textContent = maturidadeDesc + ' | ' + confGeral + '% conformidade';
+}
+
+// ══════════════════════════════════════════════════════════════
+// ANÁLISE INDIVIDUAL DA UNIDADE
+// ══════════════════════════════════════════════════════════════
+function carregarAnaliseUnidade(unidade){
+  if(!unidade){
+    document.getElementById('analise-alertas-falhas').innerHTML='<div class="empty" style="padding:24px;text-align:center"><div class="empty-icon">🔍</div><div class="empty-text" style="color:var(--text3);font-size:.85rem">Selecione uma unidade para visualizar falhas recorrentes</div></div>';
+    document.getElementById('analise-conf-media').textContent='—';
+    document.getElementById('analise-total-audit').textContent='0';
+    document.getElementById('analise-ultima-data').textContent='—';
+    document.getElementById('analise-nc-criticas').innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text" style="color:var(--text3);font-size:.85rem">Nenhuma NC crítica ou unidade não selecionada</div></div>';
+    document.getElementById('analise-tbody-auditorias').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Selecione uma unidade</td></tr>';
+    document.getElementById('analise-por-eixo').innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-text" style="font-size:.85rem">Selecione uma unidade</div></div>';
+    if(window.chartAnaliseEvolucao) window.chartAnaliseEvolucao.destroy();
+    return;
+  }
+
+  // Filtrar auditorias da unidade
+  const audiUnidade = state.auditorias.filter(a => a.unidade === unidade).sort((a,b) => new Date(b.data) - new Date(a.data));
+  
+  if(audiUnidade.length === 0){
+    toast('Nenhuma auditoria encontrada para esta unidade');
+    return;
+  }
+
+  // ── Indicadores Gerais ──
+  const finalizadas = audiUnidade.filter(a => a.status === 'Finalizada');
+  const confByAudit = audiUnidade.map(a => {
+    const s = calcScore(a);
+    return s.total > 0 ? Math.round((s.score / s.total) * 100) : 0;
+  });
+  
+  const confMedia = confByAudit.length > 0 ? Math.round(confByAudit.reduce((a,b) => a+b, 0) / confByAudit.length) : 0;
+  const ultimaAudit = audiUnidade[0];
+  const dataUltima = new Date(ultimaAudit.data).toLocaleDateString('pt-BR');
+  
+  document.getElementById('analise-conf-media').textContent = confMedia + '%';
+  document.getElementById('analise-total-audit').textContent = audiUnidade.length;
+  document.getElementById('analise-ultima-data').textContent = dataUltima;
+  document.getElementById('analise-ultima-sub').textContent = ultimaAudit.status;
+  
+  // ── Evolução ──
+  let evolucao = '—';
+  if(audiUnidade.length >= 2){
+    const s1 = calcScore(audiUnidade[1]);
+    const s0 = calcScore(ultimaAudit);
+    const pct1 = s1.total > 0 ? Math.round((s1.score / s1.total) * 100) : 0;
+    const pct0 = s0.total > 0 ? Math.round((s0.score / s0.total) * 100) : 0;
+    const delta = pct0 - pct1;
+    evolucao = (delta > 0 ? '+' : '') + delta + '%';
+    document.getElementById('analise-evolucao').textContent = evolucao;
+    document.getElementById('analise-evolucao').style.color = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--text)';
+  }
+
+  // ── Falhas Recorrentes ──
+  const todasNC = {};
+  audiUnidade.forEach(audit => {
+    Object.entries(audit.respostas || {}).forEach(([id, resp]) => {
+      if(resp.val === 'NC' || resp.val === 'PC'){
+        const item = CHECKLIST_BASE.find(i => i.id === id);
+        if(item){
+          const key = item.req;
+          todasNC[key] = (todasNC[key] || 0) + 1;
+        }
+      }
+    });
+  });
+
+  const topFalhas = Object.entries(todasNC)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 5);
+  
+  const htmlFalhas = topFalhas.length > 0
+    ? topFalhas.map(([falha, freq]) => `
+      <div style="background:var(--bg);border-left:4px solid var(--red);padding:12px;margin-bottom:8px;border-radius:4px">
+        <div style="font-weight:600;font-size:.85rem;color:var(--red);margin-bottom:3px">⚠️ Repetições: ${freq}</div>
+        <div style="font-size:.8rem;color:var(--text2);line-height:1.4">${falha}</div>
+      </div>
+    `).join('')
+    : '<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Sem falhas recorrentes</div></div>';
+  
+  document.getElementById('analise-alertas-falhas').innerHTML = htmlFalhas;
+
+  // ── Conformidade por Eixo (Última Auditoria Finalizada) ──
+  const ultimaFin = finalizadas.length > 0 ? finalizadas[0] : ultimaAudit;
+  const eixos = [...new Set(CHECKLIST_BASE.map(i => i.eixo))];
+  const eixoStats = {};
+  
+  eixos.forEach(eixo => {
+    const items = CHECKLIST_BASE.filter(i => i.eixo === eixo);
+    let c = 0, pc = 0, nc = 0, pend = 0;
+    items.forEach(item => {
+      const resp = ultimaFin.respostas?.[item.id];
+      if(!resp || !resp.val) pend++;
+      else if(resp.val === 'C') c++;
+      else if(resp.val === 'PC') pc++;
+      else if(resp.val === 'NC') nc++;
+    });
+    const total = c + pc + nc;
+    const conf = total > 0 ? Math.round((c / total) * 100) : 0;
+    eixoStats[eixo] = { c, pc, nc, pend, conf, total };
+  });
+
+  const htmlEixo = Object.entries(eixoStats).map(([eixo, stats]) => {
+    const colors = stats.conf >= 70 ? 'green' : stats.conf >= 50 ? 'yellow' : 'red';
+    return `
+      <div style="margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:.88rem">${eixo}</strong>
+          <span style="font-weight:700;color:var(--${colors})">${stats.conf}%</span>
+        </div>
+        <div style="display:flex;gap:8px;font-size:.75rem">
+          <span style="background:var(--green-soft);color:var(--green);padding:3px 8px;border-radius:12px">C: ${stats.c}</span>
+          <span style="background:var(--yellow-soft);color:var(--yellow);padding:3px 8px;border-radius:12px">PC: ${stats.pc}</span>
+          <span style="background:var(--red-soft);color:var(--red);padding:3px 8px;border-radius:12px">NC: ${stats.nc}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('analise-por-eixo').innerHTML = htmlEixo;
+
+  // ── Tabela de Auditorias ──
+  const htmlTable = audiUnidade.map(audit => {
+    const s = calcScore(audit);
+    const conf = s.total > 0 ? Math.round((s.score / s.total) * 100) : 0;
+    const dataForm = new Date(audit.data).toLocaleDateString('pt-BR');
+    const statusColor = audit.status === 'Finalizada' ? 'green' : 'yellow';
+    return `
+      <tr>
+        <td>${dataForm}</td>
+        <td>${audit.tipo}</td>
+        <td><span class="pill pill-${statusColor === 'green' ? 'c' : 'pc'}">${audit.status}</span></td>
+        <td style="text-align:center;color:var(--green);font-weight:600">${s.score}</td>
+        <td style="text-align:center;color:var(--yellow);font-weight:600">${s.pc}</td>
+        <td style="text-align:center;color:var(--red);font-weight:600">${s.nc}</td>
+        <td style="text-align:center;font-weight:700;color:var(--${conf >= 70 ? 'green' : conf >= 50 ? 'yellow' : 'red'})">${conf}%</td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('analise-tbody-auditorias').innerHTML = htmlTable;
+
+  // ── Gráfico de Evolução ──
+  const ctx = document.getElementById('chart-analise-evolucao').getContext('2d');
+  if(window.chartAnaliseEvolucao) window.chartAnaliseEvolucao.destroy();
+  
+  window.chartAnaliseEvolucao = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: audiUnidade.reverse().map(a => new Date(a.data).toLocaleDateString('pt-BR')),
+      datasets: [{
+        label: 'Conformidade %',
+        data: audiUnidade.map(a => {
+          const s = calcScore(a);
+          return s.total > 0 ? Math.round((s.score / s.total) * 100) : 0;
+        }),
+        borderColor: 'var(--accent)',
+        backgroundColor: 'rgba(0,87,184,0.05)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: 'var(--accent)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+      }
+    }
+  });
+
+  // ── NC Críticas da Última Auditoria ──
+  const ncCriticas = [];
+  CHECKLIST_BASE.forEach(item => {
+    const resp = ultimaFin.respostas?.[item.id];
+    if(resp && resp.val === 'NC'){
+      ncCriticas.push({ item, obs: resp.obs || '' });
+    }
+  });
+
+  const htmlNC = ncCriticas.length > 0
+    ? ncCriticas.slice(0, 10).map(({item, obs}) => `
+      <div style="background:var(--red-soft);border-left:4px solid var(--red);padding:12px;margin-bottom:8px;border-radius:4px">
+        <div style="font-weight:600;font-size:.85rem;color:var(--red);margin-bottom:3px">🔴 ${item.eixo}</div>
+        <div style="font-size:.8rem;color:var(--text2);margin-bottom:4px;line-height:1.4">${item.req}</div>
+        ${obs ? `<div style="font-size:.75rem;color:var(--text3);font-style:italic">📝 ${obs}</div>` : ''}
+      </div>
+    `).join('')
+    : '<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Sem NC na última auditoria</div></div>';
+
+  document.getElementById('analise-nc-criticas').innerHTML = htmlNC;
+}
+
+// ─ Populador do select de unidades (chamar após init) ─
+function populateAnaliseUnidades(){
+  const unidades = [...new Set(state.auditorias.map(a => a.unidade))].sort();
+  const sel = document.getElementById('analise-unidade-select');
+  sel.innerHTML = '<option value="">— Escolha uma unidade para análise —</option>' + unidades.map(u => `<option>${u}</option>`).join('');
+}
+
 async function init(){
   _showLoading(true);
 
@@ -3610,6 +4527,7 @@ async function init(){
 
   _showLoading(false);
   document.getElementById('new-unidade').innerHTML='<option value="">Selecione a unidade…</option>'+UNIDADES.map(u=>`<option>${u}</option>`).join('');
+  populateAnaliseUnidades();
   updateFilters();
   renderDashboard();
   renderNotifPanel();
@@ -3617,5 +4535,6 @@ async function init(){
 // Acesso aberto: sem tela de login, a aplicação inicializa direto ao carregar a página
 init();
 </script>
+</div><!-- Fecha app-container -->
 </body>
 </html>
